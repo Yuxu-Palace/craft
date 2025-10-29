@@ -1,7 +1,17 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!node_modules",
+      "!!.netlify",
+      "!!.nitro",
+      "!!.output",
+      "!!.tanstack",
+      "!!dist",
+      "!./src/route-tree.gen.ts"
+    ]
   },
   "assist": {
     "actions": {
@@ -386,7 +396,7 @@
         "useBiomeIgnoreFolder": { "level": "error" },
         "noAlert": { "level": "error" },
         "noApproximativeNumericConstant": { "level": "error", "fix": "safe" },
-        "noArrayIndexKey": { "level": "info" },
+        "noArrayIndexKey": { "level": "warn" },
         "noAssignInExpressions": "error",
         "noAsyncPromiseExecutor": { "level": "error" },
         "noBitwiseOperators": "off",

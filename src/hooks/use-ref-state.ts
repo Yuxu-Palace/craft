@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useEffectEvent, useMemo, useRef } from 'react';
 import { useForceUpdate } from './use-force-update';
 
 interface RefStateController<T> {
@@ -19,19 +19,18 @@ interface RefStateOptions<T> {
 export function useRefState<T extends Record<PropertyKey, any>>(
   initialData: T,
   _options?: RefStateOptions<T>,
-): [T, RefStateController<T>] {
+): readonly [T, RefStateController<T>] {
   const stateRef = useRef(initialData);
   const originRef = useRef(structuredClone(initialData));
   const _forceUpdate = useForceUpdate();
 
-  // TODO(cmtlyt): react@19.2 版本可以尝试使用 useEffectEvent 来优化部分 hook 对函数的依赖项问题
-  const controller = useMemo<RefStateController<T>>(() => {
-    const forceUpdate = (update?: boolean) => {
-      if (update) {
-        _forceUpdate();
-      }
-    };
+  const forceUpdate = useEffectEvent((update?: boolean) => {
+    if (update) {
+      _forceUpdate();
+    }
+  });
 
+  const controller = useMemo<RefStateController<T>>(() => {
     return {
       getState: () => stateRef.current,
       setState: (newState, update = true) => {
@@ -44,13 +43,13 @@ export function useRefState<T extends Record<PropertyKey, any>>(
         patchFn(stateRef.current);
         forceUpdate(update);
       },
-      forceUpdate: _forceUpdate,
+      forceUpdate,
       reset: (update = true) => {
         stateRef.current = originRef.current;
         forceUpdate(update);
       },
     };
-  }, [_forceUpdate]);
+  }, []);
 
-  return [stateRef.current, controller];
+  return [stateRef.current, controller] as const;
 }
